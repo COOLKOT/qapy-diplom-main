@@ -1,0 +1,6 @@
+
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY gate-simulator.jar /app/gate-simulator.jar
+EXPOSE 9999
+CMD ["java", "-jar", "gate-simulator.jar"]
