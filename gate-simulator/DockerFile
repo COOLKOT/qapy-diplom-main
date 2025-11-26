@@ -1,6 +1,15 @@
+FROM node:18-alpine
 
-FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY gate-simulator.jar /app/gate-simulator.jar
+COPY package*.json ./
+RUN npm install
+
+# Копируем код эмулятора
+COPY . .
+
 EXPOSE 9999
-CMD ["java", "-jar", "gate-simulator.jar"]
+
+# Проверка работоспособности (опционально)
+HEALTHCHECK CMD curl -f http://localhost:9999/health || exit 1
+
+CMD ["npm", "start"]

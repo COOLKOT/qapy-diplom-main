@@ -1,20 +1,24 @@
-version: '3.8'
-
 services:
-  mysql:
+  # База данных MySQL
+  db:
     image: mysql:8.0
-    container_name: aqa-mysql
+    container_name: aqa-shop-db
     environment:
-      MYSQL_ROOT_PASSWORD: 270996Dcp1488
       MYSQL_DATABASE: app
       MYSQL_USER: app
       MYSQL_PASSWORD: pass
+      MYSQL_ROOT_PASSWORD: rootpass
     ports:
       - "3306:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - db_data:/var/lib/mysql
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
+  # Эмулятор платёжного шлюза
   gate-simulator:
     build:
       context: ./gate-simulator
@@ -22,27 +26,36 @@ services:
     container_name: aqa-gate-simulator
     ports:
       - "9999:9999"
+    depends_on:
+      - db
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  aqa-shop:
-    image: eclipse-temurin:17-jdk
+  # Основное приложение (Java)
+  app:
+    image: eclipse-temurin:21-jdk-jammy
     container_name: aqa-shop-app
+    volumes:
+      - ./aqa-shop.jar:/app/aqa-shop.jar
+      - ./application.properties:/app/application.properties
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/app?useSSL=false&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: app
-      SPRING_DATASOURCE_PASSWORD: pass
-      SPRING_CREDIT_GATE_URL: http://gate-simulator:9999/credit
-      SPRING_PAYMENT_GATE_URL: http://gate-simulator:9999/payment
+      SPRING_CONFIG_LOCATION: "file:/app/application.properties"
     depends_on:
-      - mysql
+      - db
       - gate-simulator
-    volumes:
-      - ./aqa-shop.jar:/app/aqa-shop.jar
     command: ["java", "-jar", "/app/aqa-shop.jar"]
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
-  mysql-data:
-
+  db_data:
