@@ -9,7 +9,7 @@ import use_functions
 def test_payment_approved(driver):
     wait = WebDriverWait(driver, 10)
     use_functions.fill_form(driver, 'Купить')
-    # Проверяем, что появилось сообщение об успехе
+    
     success_message = wait.until(
         EC.visibility_of_element_located((By.XPATH, "//div[text() =  'Успешно']"))
     )
