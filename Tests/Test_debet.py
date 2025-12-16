@@ -294,6 +294,8 @@ def test_fields_owner_error(driver, test_owner, expected_error_owner):
     ("1", "Неверный формат"),
     ("12", "Неверный формат"),
     ("1234", "Неверный формат"),
+    ("-11", "Неверный формат"),
+    ("Abc", "Неверный формат"),
 ])
 def test_fields_cvv_error(driver, test_cvv, expected_error_cvv):
     wait = WebDriverWait(driver, 15)
