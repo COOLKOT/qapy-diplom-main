@@ -13,7 +13,7 @@ def test_payment_approved(driver):
     wait = WebDriverWait(driver, 10)
     driver.get(Data.url)
 
-    use_functions.fill_form(driver, 'Купить', Data.valid_data)
+    use_functions.fill_form(driver, 'Купить в кредит', Data.valid_data)
 
     success_message = wait.until(
         EC.visibility_of_element_located((By.XPATH, "//div[normalize-space()='Операция одобрена Банком.']"))
@@ -36,7 +36,7 @@ def test_payment_declined(driver):
     driver.get(Data.url)
 
     # Заполняем форму с данными, при которых оплата отклоняется
-    use_functions.fill_form(driver, 'Купить', Data.invalid_data)
+    use_functions.fill_form(driver, 'Купить в кредит', Data.invalid_data)
 
     # Ожидаем сообщение об ошибке
     error_message = wait.until(
@@ -68,7 +68,7 @@ def test_card_number_invalid(driver, test_card_number,expected_error_number_card
     driver.get(Data.url)
 
     # Открываем форму
-    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить']")))
+    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить в кредит']")))
     buy_button.click()
 
     # Ждём появления всех полей
@@ -88,10 +88,10 @@ def test_card_number_invalid(driver, test_card_number,expected_error_number_card
             fields[i].send_keys(Data.valid_data[i])
 
         # Нажимаем "Продолжить"
-    continue_button = wait.until(
-        EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Продолжить')]"))
-    )
-    continue_button.click()
+        continue_button = wait.until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Продолжить')]"))
+        )
+        continue_button.click()
 
     # Находим контейнер поля "Месяц"
     card_number_field = wait.until(
@@ -117,7 +117,7 @@ def test_fields_month_error(driver, test_month, expected_error_month):
     driver.get(Data.url)
 
     # Открываем форму
-    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить']")))
+    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить в кредит']")))
     buy_button.click()
 
 
@@ -166,7 +166,7 @@ def test_fields_year_error(driver, test_year_error):
     driver.get(Data.url)
 
     # Открываем форму
-    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить']")))
+    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить в кредит']")))
     buy_button.click()
 
 
@@ -244,7 +244,7 @@ def test_fields_owner_error(driver, test_owner, expected_error_owner):
     driver.get(Data.url)
 
     # Открываем форму
-    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить']")))
+    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить в кредит']")))
     buy_button.click()
 
     # Ждём появления всех полей
@@ -300,7 +300,7 @@ def test_fields_cvv_error(driver, test_cvv, expected_error_cvv):
     driver.get(Data.url)
 
     # Открываем форму
-    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить']")))
+    buy_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Купить в кредит']")))
     buy_button.click()
 
     # Ждём появления всех полей

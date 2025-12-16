@@ -8,10 +8,14 @@ services:
       MYSQL_USER: app
       MYSQL_PASSWORD: pass
       MYSQL_ROOT_PASSWORD: rootpass
+      TZ: Europe/Moscow
+      MYSQL_TIME_ZONE: Europe/Moscow
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -49,7 +53,7 @@ services:
     depends_on:
       - db
       - gate-simulator
-    command: ["java", "-jar", "/app/aqa-shop.jar"]
+    command: ["java", "-Duser.timezone=Europe/Moscow", "-jar", "/app/aqa-shop.jar"]
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
