@@ -1,0 +1,18 @@
+
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+
+Reports/Allure-Results/
+Reports/Allure-HTML/
+
+
+.idea/
+.vscode/
+
+
+*.log# created by virtualenv automatically
+

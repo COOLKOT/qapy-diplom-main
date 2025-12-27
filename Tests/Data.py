@@ -1,15 +1,24 @@
-import sys
-
-sys.stdout.reconfigure(encoding='utf-8')
 
 url = 'http://localhost:8080/'
 
-# Данные для успешной оплаты
+button_texts = ["Купить", "Купить в кредит"]
 
+# Данные для успешной оплаты
 valid_data = ['4444 4444 4444 4441', '12', '25','Andrey', '111']
+
 
 #Данные для отклоненной оплаты
 invalid_data = ['4444 4444 4444 4442','12','25','Andrey', '111']
+
+test_card_number = ["4444 4444 4444 444", "4444 4444 4444 44444", "", "aaaa aaaa aaaa aaaa", "!@#$ !@#$ $#@! %^&*"]
+
+test_year_errors = ["", "31", "24", "Ab", "311", "!@", "-1"]
+
+test_month_errors = ["", "13", "00", "Ab", "131", "!@", "-1"]
+
+test_owner_errors = ["", "Andrey123", "Andrey!!!!", "12345", "!@#$%^&*()_", "Андрей"]
+
+test_cvv_errors = ["","1","12","1234","-11","Abc"]
 
 
 

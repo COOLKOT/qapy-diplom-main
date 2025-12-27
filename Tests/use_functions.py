@@ -1,8 +1,6 @@
-
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
 
 import Data
 
@@ -31,3 +29,5 @@ def fill_form(driver, button_text, t_data):
         EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Продолжить')]"))
     )
     continue_button.click()
+
+

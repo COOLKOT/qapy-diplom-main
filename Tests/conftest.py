@@ -2,8 +2,8 @@ import pytest
 import mysql.connector
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
-
+import time
+import requests
 
 @pytest.fixture
 def driver():
@@ -25,14 +25,14 @@ def driver():
     yield driver
     driver.quit()
 
+import pytest
+import mysql.connector
+
 
 @pytest.fixture(scope="function")
-def db_connection(table_name):
-    """
-    Фикстура для подключения к БД и очистки таблицы payment_entity перед тестом.
-    """
+def db_connection():
+    """Фикстура: подключение к БД + очистка перед тестом"""
     conn = None
-    cursor = None
     try:
         conn = mysql.connector.connect(
             host='localhost',
@@ -42,19 +42,18 @@ def db_connection(table_name):
             password='pass'
         )
         cursor = conn.cursor()
-        cursor.execute("SET SESSION sql_mode = ''")
         cursor.execute("DELETE FROM payment_entity;")
+        cursor.execute("DELETE FROM order_entity;")
+        cursor.execute("DELETE FROM credit_request_entity;")
         conn.commit()
+        cursor.close()
     except Exception as e:
+        pytest.fail(f"Ошибка подключения к БД: {e}")
         if conn and conn.is_connected():
-            conn.rollback()
-        raise Exception(f"Ошибка подключения к БД или очистки таблицы: {e}")
-    finally:
-        if cursor:
-            cursor.close()
+            conn.close()
+        raise
 
     yield conn
 
-    # Закрытие соединения после теста
     if conn and conn.is_connected():
         conn.close()
