@@ -20,28 +20,20 @@ jobs:
           --health-retries=10
 
     steps:
-      # 1. Клонируем репозиторий
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
-      # 3. Устанавливаем зависимости
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          sed -i 's/coverage==7.13.0/coverage>=7.0,<7.13/g' requirements.txt
           pip install -r requirements.txt
 
-      # 4. Устанавливаем Docker Compose
-      - name: Set up Docker Compose
-        run: |
-          echo "Docker Compose установка не требуется — уже доступен в ubuntu-latest"
-
-      # 5. Запускаем SUT (веб-приложение) из docker-compose.yml
       - name: Start SUT (app container only)
         run: |
           docker-compose up -d app
@@ -50,7 +42,6 @@ jobs:
           SPRING_DATASOURCE_USERNAME: app
           SPRING_DATASOURCE_PASSWORD: pass
 
-      # 6. Ждём, пока приложение станет доступно
       - name: Wait for SUT to be ready
         run: |
           for i in {1..60}; do
@@ -58,7 +49,6 @@ jobs:
           done
         continue-on-error: false
 
-      # 7. Запускаем UI-тесты
       - name: Run UI tests
         run: |
           pytest Tests/test_UI.py \
@@ -66,16 +56,13 @@ jobs:
             --clean-alluredir \
             -v
 
-      # 8. Запускаем тесты БД (если нужно)
       - name: Run DB tests
         run: pytest Tests/test_db.py -v
 
-      # 9. Генерируем HTML-отчёт Allure
       - name: Generate Allure HTML Report
         run: |
           allure generate Reports/Allure-Results -o Reports/Allure-HTML --clean || echo "Allure report generation skipped"
 
-      # 10. Сохраняем результаты
       - name: Upload Allure results (JSON)
         uses: actions/upload-artifact@v4
         if: always()
