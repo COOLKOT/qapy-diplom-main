@@ -9,7 +9,7 @@ COPY . .
 
 EXPOSE 9999
 
-# Проверка работоспособности (опционально)
+# Проверка работоспособности
 HEALTHCHECK CMD curl -f http://localhost:9999/health || exit 1
 
 CMD ["npm", "start"]

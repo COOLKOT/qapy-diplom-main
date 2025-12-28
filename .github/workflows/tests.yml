@@ -4,13 +4,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      mysql:
+      db:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: app
           MYSQL_USER: app
           MYSQL_PASSWORD: pass
+          MYSQL_ROOT_PASSWORD: rootpass
         ports:
           - 3306:3306
         options: >-
@@ -28,23 +28,30 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libyaml-dev gcc g++ make
+
+      - name: Upgrade pip and install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install --only-binary=PyYAML -r requirements.txt
+
+      - name: Install Docker Compose
+        run: |
+          pip install docker-compose
 
       - name: Start SUT
         run: |
-          docker-compose up -d app
+          docker-compose up -d
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/app
-          SPRING_DATASOURCE_USERNAME: app
-          SPRING_DATASOURCE_PASSWORD: pass
+          SPRING_CONFIG_LOCATION: file:/app/application.properties
 
-      - name: Wait for SUT to be ready
+      - name: Wait for app to be ready
         run: |
           for i in {1..60}; do
-            curl -f http://localhost:8080 && echo "SUT is ready!" && break || sleep 5
+            curl -f http://localhost:8080/actuator/health && echo "App is ready!" && break || sleep 5
           done
 
       - name: Run UI tests
@@ -54,8 +61,19 @@ jobs:
             --clean-alluredir \
             -v
 
+      - name: Run API tests
+        run: |
+          pytest Tests/test_api.py \
+            --alluredir=Reports/Allure-Results \
+            --clean-alluredir \
+            -v
+
       - name: Run DB tests
-        run: pytest Tests/test_db.py -v
+        run: |
+          pytest Tests/test_db.py \
+            --alluredir=Reports/Allure-Results \
+            --clean-alluredir \
+            -v
 
       - name: Generate Allure HTML Report
         run: |
