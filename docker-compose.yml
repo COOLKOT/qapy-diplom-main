@@ -21,7 +21,9 @@ services:
       retries: 10
 
   gate-simulator:
-    image: tmokm/hw9-gate-simulator:latest
+    build:
+      context: ./gate-simulator
+      dockerfile: Dockerfile
     container_name: aqa-gate-simulator
     ports:
       - "9999:9999"
@@ -36,7 +38,9 @@ services:
       retries: 3
 
   app:
-    image: tmokm/hw9-shop-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: aqa-shop-app
     environment:
       SPRING_CONFIG_LOCATION: file:/app/application.properties

@@ -15,7 +15,7 @@ import use_functions
 
 @pytest.mark.parametrize("button_text", Data.button_texts)
 @allure.feature("UI")
-@allure.story("Оплата по карте")
+@allure.story("Успешная оплата по карте")
 @allure.severity(allure.severity_level.CRITICAL)
 def test_payment_approved(driver, button_text):
     wait = WebDriverWait(driver, 15)
@@ -57,7 +57,7 @@ def test_payment_approved(driver, button_text):
 
 @pytest.mark.parametrize("button_text", Data.button_texts)
 @allure.feature("UI")
-@allure.story("Оплата по карте")
+@allure.story("Отклоненная оплата по карте")
 @allure.severity(allure.severity_level.CRITICAL)
 def test_payment_declined(driver, button_text):
     wait = WebDriverWait(driver, 15)
@@ -110,7 +110,7 @@ def test_payment_declined(driver, button_text):
     "test_card_number_error,button_text",
     list(product(Data.test_card_number, Data.button_texts)))
 @allure.feature("UI")
-@allure.story("Валидация полей")
+@allure.story("Валидация поля 'Номер карты'")
 @allure.severity(allure.severity_level.NORMAL)
 def test_card_number_invalid(driver, button_text, test_card_number_error):
     cleaned_number = test_card_number_error.replace(" ", "")
@@ -181,7 +181,7 @@ def test_card_number_invalid(driver, button_text, test_card_number_error):
     "test_month_errors, button_text",
     list(product(Data.test_month_errors, Data.button_texts)))
 @allure.feature("UI")
-@allure.story("Валидация полей")
+@allure.story("Валидация поля 'Месяц'")
 @allure.severity(allure.severity_level.NORMAL)
 def test_fields_month_error(driver, test_month_errors, button_text):
     if test_month_errors.isdigit() and 1 <= int(test_month_errors) <= 12:
@@ -237,8 +237,10 @@ def test_fields_month_error(driver, test_month_errors, button_text):
         expected = "Неверный формат"
     else:
         month_val = int(test_month_errors)
-        if month_val < 1 or month_val > 12:
+        if month_val < 1 or 12 < month_val <= 99:
             expected = "Неверно указан срок действия карты"
+        else:
+            expected = "Неверный формат"
 
     if expected:
         actual = error_message.text.strip()
@@ -248,12 +250,11 @@ def test_fields_month_error(driver, test_month_errors, button_text):
     allure.title(f"Месяц '{test_month_errors}' → '{expected}'")
 
 
-# Тест проверки появления ошибки при вводе неверного поля год
 @pytest.mark.parametrize(
     "test_year_errors, button_text",
     list(product(Data.test_year_errors, Data.button_texts)))
 @allure.feature("UI")
-@allure.story("Валидация полей")
+@allure.story("Валидация поля 'Год'")
 @allure.severity(allure.severity_level.NORMAL)
 def test_fields_year_error(driver, button_text, test_year_errors):
     current_year = int(datetime.now().strftime("%y"))
@@ -329,7 +330,7 @@ def test_fields_year_error(driver, button_text, test_year_errors):
     "test_owner_errors, button_text",
     list(product(Data.test_owner_errors, Data.button_texts)))
 @allure.feature("UI")
-@allure.story("Валидация полей")
+@allure.story("Валидация поля 'Владелец'")
 @allure.severity(allure.severity_level.NORMAL)
 def test_fields_owner_error(driver, button_text, test_owner_errors):
     if re.fullmatch(r'[a-zA-Z ]+', test_owner_errors) and 2 <= len(test_owner_errors.strip()) <= 50:

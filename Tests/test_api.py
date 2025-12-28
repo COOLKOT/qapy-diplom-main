@@ -159,7 +159,6 @@ def test_invalid_card_number_length(url, card_number):
         allure.attach(error_type, name="Тип ошибки", attachment_type=AttachmentType.TEXT)
 
 
-# Пустое тело запроса
 @allure.feature("API")
 @allure.story("Валидация запроса")
 @allure.title("Пустое тело запроса: статус 400")
@@ -171,12 +170,12 @@ def test_empty_request_body(url):
         attach_request_response(url, None, response)
 
 
-# Неверный формат владельца
 @allure.feature("API")
 @allure.story("Валидация владельца")
 @allure.title("Невалидное имя владельца: ожидается DECLINED")
 @pytest.mark.parametrize("url", [url_payment, url_credit])
 @pytest.mark.parametrize("holder_value", [
+    "",
     "Andrey123",
     "Andrey!!!!",
     "12345",
@@ -204,7 +203,6 @@ def test_invalid_holder(url, holder_value):
         allure.attach(error_reason, name="Причина отклонения", attachment_type=AttachmentType.TEXT)
 
 
-# Просроченная карта
 @allure.feature("API")
 @allure.story("Валидация срока действия")
 @allure.title("Просроченная карта: статус DECLINED")
@@ -228,13 +226,12 @@ def test_expired_card(url):
         )
 
 
-# Карта сроком более 5 лет
 @allure.feature("API")
 @allure.story("Валидация срока действия")
 @allure.title("Карта более 5 лет: статус DECLINED")
 @pytest.mark.parametrize("url", [url_payment, url_credit])
 def test_expired_card_old(url):
-    with allure.step("Проверка карты сроком >5 лет"):
+    with allure.step("Проверка карты сроком > 5 лет"):
         current_year = int(datetime.now().strftime("%y"))
         payload = valid_data_card.copy()
         payload["year"] = str(current_year + 6)
@@ -251,12 +248,11 @@ def test_expired_card_old(url):
         )
 
 
-# Неверная длина CVC
 @allure.feature("API")
 @allure.story("Валидация CVC")
 @allure.title("Неверная длина CVC: ожидается DECLINED")
 @pytest.mark.parametrize("url", [url_payment, url_credit])
-@pytest.mark.parametrize("cvc", ["", "1", "12", "1234"])
+@pytest.mark.parametrize("cvc", ["", "1", "12", "1234", "abc"])
 def test_invalid_cvc_length(url, cvc):
     with allure.step(f"Проверка CVC: {cvc}"):
         payload = valid_data_card.copy()
@@ -272,7 +268,15 @@ def test_invalid_cvc_length(url, cvc):
             reason = "Пустое значение"
         elif len(cvc) < 3:
             reason = "Слишком короткий"
-        else:
+        elif len(cvc) > 3:
             reason = "Слишком длинный"
+        elif not cvc.isdigit():
+            reason = "Содержит буквы или символы"
+        else:
+            reason = "Некорректный формат"
 
-        allure.attach(reason, name="Причина ошибки", attachment_type=AttachmentType.TEXT)
+        allure.attach(
+            reason,
+            name="Причина ошибки",
+            attachment_type=allure.attachment_type.TEXT
+        )
