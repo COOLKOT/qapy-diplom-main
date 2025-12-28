@@ -1,5 +1,5 @@
+
 services:
-  # База данных MySQL
   db:
     image: mysql:8.0
     container_name: aqa-shop-db
@@ -14,15 +14,12 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
 
-  # Эмулятор платёжного шлюза
   gate-simulator:
     build:
       context: ./gate-simulator
@@ -35,29 +32,24 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9999/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9999/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Основное приложение (Java)
   app:
-    image: eclipse-temurin:21-jdk-jammy
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: aqa-shop-app
-    volumes:
-      - ./aqa-shop.jar:/app/aqa-shop.jar
-      - ./application.properties:/app/application.properties
     ports:
       - "8080:8080"
-    environment:
-      SPRING_CONFIG_LOCATION: "file:/app/application.properties"
     depends_on:
       - db
       - gate-simulator
-    command: ["java", "-Duser.timezone=Europe/Moscow", "-jar", "/app/aqa-shop.jar"]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
