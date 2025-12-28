@@ -26,15 +26,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'  # ✅ Обновлено: Python 3.11 вместо 3.9
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          sed -i 's/coverage==7.13.0/coverage>=7.0,<7.13/g' requirements.txt
-          pip install -r requirements.txt
+          pip install -r requirements.txt  # ✅ Без sed — чистая установка
 
-      - name: Start SUT (app container only)
+      - name: Start SUT
         run: |
           docker-compose up -d app
         env:
@@ -47,7 +46,6 @@ jobs:
           for i in {1..60}; do
             curl -f http://localhost:8080 && echo "SUT is ready!" && break || sleep 5
           done
-        continue-on-error: false
 
       - name: Run UI tests
         run: |
@@ -61,13 +59,13 @@ jobs:
 
       - name: Generate Allure HTML Report
         run: |
-          allure generate Reports/Allure-Results -o Reports/Allure-HTML --clean || echo "Allure report generation skipped"
+          allure generate Reports/Allure-Results -o Reports/Allure-HTML --clean
 
-      - name: Upload Allure results (JSON)
+      - name: Upload Allure results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: allure-results-json
+          name: allure-results
           path: Reports/Allure-Results
 
       - name: Upload Allure HTML report
