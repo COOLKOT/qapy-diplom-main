@@ -16,14 +16,12 @@ services:
       - db_data:/var/lib/mysql
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
 
   gate-simulator:
-    build:
-      context: ./gate-simulator
-      dockerfile: Dockerfile
+    image: tmokm/hw9-gate-simulator:latest
     container_name: aqa-gate-simulator
     ports:
       - "9999:9999"
@@ -32,16 +30,18 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9999/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:9999/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: tmokm/hw9-shop-app:latest
     container_name: aqa-shop-app
+    environment:
+      SPRING_CONFIG_LOCATION: file:/app/application.properties
+    volumes:
+      - ./application.properties:/app/application.properties
     ports:
       - "8080:8080"
     depends_on:
@@ -49,7 +49,7 @@ services:
       - gate-simulator
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
