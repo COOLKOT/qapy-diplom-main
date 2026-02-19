@@ -1,0 +1,5 @@
+pytest~=9.0.1
+allure-python-commons~=2.15.2
+selenium~=4.38.0
+mysql-connector-python~=9.5.0
+requests~=2.32.5

@@ -1,0 +1,62 @@
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: aqa-shop-db
+    environment:
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: pass
+      MYSQL_ROOT_PASSWORD: rootpass
+      TZ: Europe/Moscow
+      MYSQL_TIME_ZONE: Europe/Moscow
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  gate-simulator:
+    build:
+      context: ./gate-simulator
+      dockerfile: Dockerfile
+    container_name: aqa-gate-simulator
+    ports:
+      - "9999:9999"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aqa-shop-app
+    environment:
+      SPRING_CONFIG_LOCATION: file:/app/application.properties
+    volumes:
+      - ./application.properties:/app/application.properties
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - gate-simulator
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  db_data:
